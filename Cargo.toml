@@ -1,6 +1,6 @@
 [package]
 name = "ghost-scrub"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Strip invisible characters from text and code files"
 authors = ["John Vrbanac <john.vrbanac@linux.com>"]

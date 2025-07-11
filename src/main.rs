@@ -23,7 +23,7 @@ struct CliConfig {
 
 fn main() {
     let matches = Command::new("ghost-scrub")
-        .version("0.1.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .author("John Vrbanac <john.vrbanac@linux.com>")
         .about("Strip invisible characters from text and code files")
         .subcommand(
