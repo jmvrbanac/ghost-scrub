@@ -203,6 +203,25 @@ end, {
 
 -- Optional keybinding
 vim.keymap.set('n', '<leader>gs', ':GhostScrub<CR>', { desc = 'Ghost Scrub current file' })
+
+-- Optional: Run on save
+-- Set this to true to enable auto-run on save
+local ghost_scrub_on_save = false
+
+if ghost_scrub_on_save then
+  vim.api.nvim_create_autocmd('BufWritePost', {
+    pattern = '*',
+    callback = function()
+      vim.cmd('GhostScrub')
+    end,
+    desc = 'Run Ghost Scrub after saving'
+  })
+end
+
+-- Or use a global variable to toggle it dynamically:
+-- vim.g.ghost_scrub_auto = true  -- Enable
+-- vim.g.ghost_scrub_auto = false -- Disable
+-- Then toggle with: :let g:ghost_scrub_auto = v:true
 ```
 
 ## 🛡️ Safety Features
