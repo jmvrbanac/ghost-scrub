@@ -142,7 +142,7 @@ impl FileProcessor {
             .join("\n");
 
         if has_final_newline {
-            format!("{}\n", result)
+            format!("{result}\n")
         } else {
             result
         }
@@ -164,7 +164,7 @@ impl FileProcessor {
             .join("\n");
 
         if has_final_newline {
-            format!("{}\n", result)
+            format!("{result}\n")
         } else {
             result
         }
