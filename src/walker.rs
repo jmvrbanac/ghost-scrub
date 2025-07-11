@@ -1,17 +1,18 @@
 use crate::config::GhostScrubConfig;
 use crate::processor::{FileProcessor, ProcessResult};
-use glob::glob;
+use glob::{glob, Pattern};
 use std::path::{Path, PathBuf};
 use std::fs;
 
 pub struct FileWalker {
     processor: FileProcessor,
+    config: GhostScrubConfig,
 }
 
 impl FileWalker {
     pub fn new(config: GhostScrubConfig) -> Self {
-        let processor = FileProcessor::new(config);
-        Self { processor }
+        let processor = FileProcessor::new(config.clone());
+        Self { processor, config }
     }
 
     pub fn process_paths(&self, paths: &[PathBuf], dry_run: bool, verbose: bool) -> Result<WalkResult, Box<dyn std::error::Error>> {
@@ -68,14 +69,14 @@ impl FileWalker {
             let path = entry.path();
 
             if path.is_dir() {
-                // Skip common build/dependency directories
-                let dir_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                if self.should_skip_directory(dir_name) {
+                if self.should_skip_path(&path) {
                     continue;
                 }
                 self.walk_directory_recursive(&path, dry_run, verbose, result)?;
             } else if path.is_file() {
-                self.process_single_file(&path, dry_run, verbose, result)?;
+                if !self.should_skip_path(&path) {
+                    self.process_single_file(&path, dry_run, verbose, result)?;
+                }
             }
         }
 
@@ -101,12 +102,19 @@ impl FileWalker {
         Ok(())
     }
 
-    fn should_skip_directory(&self, dir_name: &str) -> bool {
-        matches!(dir_name,
-            "target" | "node_modules" | ".git" | ".svn" | ".hg" |
-            "__pycache__" | ".pytest_cache" | "venv" | ".venv" |
-            "build" | "dist" | ".idea" | ".vscode" | ".DS_Store"
-        )
+    fn should_skip_path(&self, path: &Path) -> bool {
+        let path_str = path.to_string_lossy();
+
+        // Check against exclude patterns
+        for pattern_str in &self.config.exclude_patterns {
+            if let Ok(pattern) = Pattern::new(pattern_str) {
+                if pattern.matches(&path_str) {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 }
 

@@ -1,18 +1,20 @@
 use crate::config::GhostScrubConfig;
 use crate::processor::{FileProcessor, ProcessResult};
 use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use glob::Pattern;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
 pub struct FileWatcher {
     processor: FileProcessor,
+    config: GhostScrubConfig,
 }
 
 impl FileWatcher {
     pub fn new(config: GhostScrubConfig) -> Self {
-        let processor = FileProcessor::new(config);
-        Self { processor }
+        let processor = FileProcessor::new(config.clone());
+        Self { processor, config }
     }
 
     pub fn watch_paths(&self, paths: &[PathBuf]) -> Result<(), Box<dyn std::error::Error>> {
@@ -92,6 +94,17 @@ impl FileWatcher {
     }
 
     fn should_process_file(&self, path: &Path) -> bool {
+        let path_str = path.to_string_lossy();
+
+        // Check against exclude patterns from config
+        for pattern_str in &self.config.exclude_patterns {
+            if let Ok(pattern) = Pattern::new(pattern_str) {
+                if pattern.matches(&path_str) {
+                    return false;
+                }
+            }
+        }
+
         // Skip temporary files, swap files, and hidden files commonly created by editors
         if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
             if file_name.starts_with('.') ||
@@ -103,6 +116,7 @@ impl FileWatcher {
             }
         }
 
-        true
+        // Use config's file filtering logic
+        self.config.should_process_file(path)
     }
 }
