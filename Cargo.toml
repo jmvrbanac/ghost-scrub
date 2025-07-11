@@ -1,0 +1,15 @@
+[package]
+name = "ghost-scrub"
+version = "0.1.0"
+edition = "2025"
+description = "Strip invisible characters from text and code files"
+authors = ["John Vrbanac <john.vrbanac@linux.com>"]
+license = "Apache-2.0"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+glob = "0.3"
+notify = "6.0"
+unicode_categories = "0.1"
