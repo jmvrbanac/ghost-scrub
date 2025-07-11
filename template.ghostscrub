@@ -14,8 +14,32 @@ exclude_extensions = []
 # Glob patterns to include
 include_patterns = ["**/*"]
 
-# Glob patterns to exclude (e.g., "**/target/**", "**/node_modules/**")
-exclude_patterns = []
+# Glob patterns to exclude
+exclude_patterns = [
+    # Version control
+    "**/.git/**", "**/.svn/**", "**/.hg/**", "**/.bzr/**",
+
+    # Build artifacts and dependencies
+    "**/target/**", "**/node_modules/**", "**/build/**", "**/dist/**",
+    "**/out/**", "**/bin/**", "**/obj/**",
+
+    # Python
+    "**/__pycache__/**", "**/.pytest_cache/**", "**/venv/**", "**/.venv/**",
+    "**/*.egg-info/**",
+
+    # IDEs and editors
+    "**/.idea/**", "**/.vscode/**", "**/.vs/**", "**/*.swp", "**/*.swo",
+    "**/*~", "**/.#*",
+
+    # OS specific
+    "**/.DS_Store", "**/Thumbs.db", "**/desktop.ini",
+
+    # Temporary files
+    "**/*.tmp", "**/*.temp", "**/*.bak", "**/*.orig",
+
+    # Logs
+    "**/*.log", "**/logs/**"
+]
 
 # Configure which invisible characters to target
 [target_characters]

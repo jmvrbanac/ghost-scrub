@@ -58,7 +58,7 @@ impl Default for GhostScrubConfig {
             include_extensions: default_include_extensions(),
             exclude_extensions: Vec::new(),
             include_patterns: default_include_patterns(),
-            exclude_patterns: Vec::new(),
+            exclude_patterns: default_exclude_patterns(),
             target_characters: default_target_chars(),
             verbosity: default_verbosity(),
         }
@@ -115,6 +115,56 @@ fn default_include_extensions() -> Vec<String> {
 
 fn default_include_patterns() -> Vec<String> {
     vec!["**/*".to_string()]
+}
+
+fn default_exclude_patterns() -> Vec<String> {
+    vec![
+        // Version control
+        "**/.git/**".to_string(),
+        "**/.svn/**".to_string(),
+        "**/.hg/**".to_string(),
+        "**/.bzr/**".to_string(),
+
+        // Build artifacts and dependencies
+        "**/target/**".to_string(),
+        "**/node_modules/**".to_string(),
+        "**/build/**".to_string(),
+        "**/dist/**".to_string(),
+        "**/out/**".to_string(),
+        "**/bin/**".to_string(),
+        "**/obj/**".to_string(),
+
+        // Python
+        "**/__pycache__/**".to_string(),
+        "**/.pytest_cache/**".to_string(),
+        "**/venv/**".to_string(),
+        "**/.venv/**".to_string(),
+        "**/*.egg-info/**".to_string(),
+
+        // IDEs and editors
+        "**/.idea/**".to_string(),
+        "**/.vscode/**".to_string(),
+        "**/.vs/**".to_string(),
+        "**/*.swp".to_string(),
+        "**/*.swo".to_string(),
+        "**/*~".to_string(),
+        "**/.#*".to_string(),
+
+        // OS specific
+        "**/.DS_Store".to_string(),
+        "**/Thumbs.db".to_string(),
+        "**/desktop.ini".to_string(),
+
+        // Temporary files
+        "**/*.tmp".to_string(),
+        "**/*.temp".to_string(),
+        "**/*.bak".to_string(),
+        "**/*.orig".to_string(),
+
+        // Logs
+        "**/*.log".to_string(),
+        "**/logs/**".to_string(),
+    ]
 }
 
 fn default_target_chars() -> TargetCharacters {
