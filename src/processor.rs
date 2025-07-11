@@ -134,15 +134,23 @@ impl FileProcessor {
     }
 
     fn remove_trailing_whitespace(&self, content: &str) -> String {
-        content
+        let has_final_newline = content.ends_with('\n');
+        let result = content
             .lines()
             .map(|line| line.trim_end())
             .collect::<Vec<&str>>()
-            .join("\n")
+            .join("\n");
+
+        if has_final_newline {
+            format!("{}\n", result)
+        } else {
+            result
+        }
     }
 
     fn remove_whitespace_only_lines(&self, content: &str) -> String {
-        content
+        let has_final_newline = content.ends_with('\n');
+        let result = content
             .lines()
             .map(|line| {
                 if line.trim().is_empty() {
@@ -153,7 +161,13 @@ impl FileProcessor {
                 }
             })
             .collect::<Vec<&str>>()
-            .join("\n")
+            .join("\n");
+
+        if has_final_newline {
+            format!("{}\n", result)
+        } else {
+            result
+        }
     }
 
     fn print_diff(&self, file_path: &Path, original: &str, cleaned: &str, dry_run: bool) {
