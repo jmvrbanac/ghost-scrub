@@ -172,6 +172,39 @@ fi
 }
 ```
 
+### NeoVim Integration
+```lua
+-- Add to your init.lua or a plugin file
+vim.api.nvim_create_user_command('GhostScrub', function(opts)
+  local cmd = {'ghost-scrub'}
+  if opts.bang then
+    table.insert(cmd, '--dry-run')
+  end
+  if opts.args ~= '' then
+    table.insert(cmd, opts.args)
+  else
+    table.insert(cmd, vim.fn.expand('%'))
+  end
+
+  vim.fn.jobstart(cmd, {
+    on_stdout = function(_, data)
+      for _, line in ipairs(data) do
+        if line ~= '' then
+          print(line)
+        end
+      end
+    end,
+  })
+end, {
+  bang = true,  -- :GhostScrub! for dry-run
+  nargs = '?',  -- Optional file/directory argument
+  desc = 'Run Ghost Scrub on current file or specified path'
+})
+
+-- Optional keybinding
+vim.keymap.set('n', '<leader>gs', ':GhostScrub<CR>', { desc = 'Ghost Scrub current file' })
+```
+
 ## 🛡️ Safety Features
 
 - **Dry-run mode**: Preview changes before applying them
