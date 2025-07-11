@@ -15,6 +15,32 @@ Ghost Scrub removes problematic invisible characters that can break your code or
 
 ## 🚀 Installation
 
+### Download Pre-built Binaries (Recommended)
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/jmvrbanac/ghost-scrub/releases):
+
+- **Linux (x86_64)**: `ghost-scrub-v0.1.1-x86_64-unknown-linux-gnu.tar.gz`
+- **macOS (Intel)**: `ghost-scrub-v0.1.1-x86_64-apple-darwin.tar.gz`
+- **macOS (Apple Silicon)**: `ghost-scrub-v0.1.1-aarch64-apple-darwin.tar.gz`
+- **Windows**: `ghost-scrub-v0.1.1-x86_64-pc-windows-msvc.zip`
+
+```bash
+# Example for Linux:
+wget https://github.com/jmvrbanac/ghost-scrub/releases/latest/download/ghost-scrub-v0.1.1-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf ghost-scrub-v0.1.1-x86_64-unknown-linux-gnu.tar.gz
+sudo mv ghost-scrub /usr/local/bin/
+
+# Example for macOS (Intel):
+curl -L https://github.com/jmvrbanac/ghost-scrub/releases/latest/download/ghost-scrub-v0.1.1-x86_64-apple-darwin.tar.gz | tar -xz
+sudo mv ghost-scrub /usr/local/bin/
+
+# Example for macOS (Apple Silicon):
+curl -L https://github.com/jmvrbanac/ghost-scrub/releases/latest/download/ghost-scrub-v0.1.1-aarch64-apple-darwin.tar.gz | tar -xz
+sudo mv ghost-scrub /usr/local/bin/
+```
+
+### Build from Source
+
 ```bash
 # Clone and build from source
 git clone https://github.com/jmvrbanac/ghost-scrub.git
@@ -22,6 +48,16 @@ cd ghost-scrub
 cargo build --release
 
 # The binary will be in target/release/ghost-scrub
+```
+
+### Install via Cargo
+
+```bash
+# Install directly from GitHub
+cargo install --git https://github.com/jmvrbanac/ghost-scrub.git
+
+# Or install from local source
+cargo install --path .
 ```
 
 ## 📖 Usage
