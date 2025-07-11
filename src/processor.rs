@@ -11,7 +11,12 @@ impl FileProcessor {
         Self { config }
     }
 
-    pub fn process_file(&self, file_path: &Path, dry_run: bool, verbose: bool) -> Result<ProcessResult, Box<dyn std::error::Error>> {
+    pub fn process_file(
+        &self,
+        file_path: &Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> Result<ProcessResult, Box<dyn std::error::Error>> {
         if !self.config.should_process_file(file_path) {
             return Ok(ProcessResult::Skipped);
         }
@@ -34,13 +39,21 @@ impl FileProcessor {
 
         if dry_run {
             if !verbose {
-                println!("Would clean {} invisible characters from: {}", changes_count, file_path.display());
+                println!(
+                    "Would clean {} invisible characters from: {}",
+                    changes_count,
+                    file_path.display()
+                );
             }
             Ok(ProcessResult::DryRun(changes_count))
         } else {
             fs::write(file_path, cleaned_content)?;
             if !matches!(self.config.verbosity, VerbosityLevel::Silent) && !verbose {
-                println!("Cleaned {} invisible characters from: {}", changes_count, file_path.display());
+                println!(
+                    "Cleaned {} invisible characters from: {}",
+                    changes_count,
+                    file_path.display()
+                );
             }
             Ok(ProcessResult::Cleaned(changes_count))
         }
@@ -70,7 +83,8 @@ impl FileProcessor {
         }
 
         for custom_char in &self.config.target_characters.custom_chars {
-            if let Ok(unicode_char) = u32::from_str_radix(custom_char.trim_start_matches("U+"), 16) {
+            if let Ok(unicode_char) = u32::from_str_radix(custom_char.trim_start_matches("U+"), 16)
+            {
                 if let Some(ch) = char::from_u32(unicode_char) {
                     result = result.replace(ch, "");
                 }
@@ -84,11 +98,7 @@ impl FileProcessor {
     }
 
     fn remove_zero_width_spaces(&self, content: &str) -> String {
-        content
-            .replace('\u{200B}', "") // Zero Width Space
-            .replace('\u{200C}', "") // Zero Width Non-Joiner
-            .replace('\u{200D}', "") // Zero Width Joiner
-            .replace('\u{FEFF}', "") // Zero Width No-Break Space (BOM)
+        content.replace(['\u{200B}', '\u{200C}', '\u{200D}', '\u{FEFF}'], "") // Zero Width No-Break Space (BOM)
     }
 
     fn remove_non_breaking_spaces(&self, content: &str) -> String {
@@ -150,7 +160,12 @@ impl FileProcessor {
         let action = if dry_run { "Would clean" } else { "Cleaned" };
         let changes_count = self.count_changes(original, cleaned);
 
-        println!("{} {} invisible characters from: {}", action, changes_count, file_path.display());
+        println!(
+            "{} {} invisible characters from: {}",
+            action,
+            changes_count,
+            file_path.display()
+        );
 
         if changes_count == 0 {
             return;
@@ -179,7 +194,8 @@ impl FileProcessor {
     fn visualize_invisible_chars(&self, text: &str) -> String {
         if text.trim().is_empty() && !text.is_empty() {
             // Line contains only whitespace - show each character
-            format!("⦃WHITESPACE-ONLY: {}⦄",
+            format!(
+                "⦃WHITESPACE-ONLY: {}⦄",
                 text.chars()
                     .map(|ch| match ch {
                         ' ' => "SP".to_string(),
@@ -196,7 +212,8 @@ impl FileProcessor {
         } else {
             // Check for trailing whitespace
             let has_trailing_whitespace = text.len() != text.trim_end().len();
-            let main_content = text.chars()
+            let main_content = text
+                .chars()
                 .map(|ch| match ch {
                     '\u{200B}' => "⦃ZWS⦄".to_string(),
                     '\u{200C}' => "⦃ZWNJ⦄".to_string(),
@@ -205,14 +222,24 @@ impl FileProcessor {
                     '\u{00A0}' => "⦃NBSP⦄".to_string(),
                     '\t' => "⦃TAB⦄".to_string(),
                     ' ' => " ".to_string(), // Keep regular spaces visible
-                    ch if ch.is_control() && ch != '\n' && ch != '\r' => format!("⦃U+{:04X}⦄", ch as u32),
-                    ch if ch.is_whitespace() && ch != ' ' && ch != '\n' && ch != '\r' && ch != '\t' => format!("⦃WS:U+{:04X}⦄", ch as u32),
+                    ch if ch.is_control() && ch != '\n' && ch != '\r' => {
+                        format!("⦃U+{:04X}⦄", ch as u32)
+                    }
+                    ch if ch.is_whitespace()
+                        && ch != ' '
+                        && ch != '\n'
+                        && ch != '\r'
+                        && ch != '\t' =>
+                    {
+                        format!("⦃WS:U+{:04X}⦄", ch as u32)
+                    }
                     ch => ch.to_string(),
                 })
                 .collect::<String>();
 
             if has_trailing_whitespace {
-                let trailing_chars: String = text.chars()
+                let trailing_chars: String = text
+                    .chars()
                     .skip(text.trim_end().len())
                     .map(|ch| match ch {
                         ' ' => "SP".to_string(),

@@ -1,7 +1,7 @@
 use crate::config::GhostScrubConfig;
 use crate::processor::{FileProcessor, ProcessResult};
-use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use glob::Pattern;
+use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
@@ -21,15 +21,13 @@ impl FileWatcher {
         let (tx, rx) = channel();
 
         let mut watcher = RecommendedWatcher::new(
-            move |res: Result<Event, notify::Error>| {
-                match res {
-                    Ok(event) => {
-                        if let Err(e) = tx.send(event) {
-                            eprintln!("Error sending watch event: {}", e);
-                        }
+            move |res: Result<Event, notify::Error>| match res {
+                Ok(event) => {
+                    if let Err(e) = tx.send(event) {
+                        eprintln!("Error sending watch event: {e}");
                     }
-                    Err(e) => eprintln!("Watch error: {}", e),
                 }
+                Err(e) => eprintln!("Watch error: {e}"),
             },
             Config::default(),
         )?;
@@ -45,14 +43,14 @@ impl FileWatcher {
             match rx.recv_timeout(Duration::from_millis(100)) {
                 Ok(event) => {
                     if let Err(e) = self.handle_event(event) {
-                        eprintln!("Error handling event: {}", e);
+                        eprintln!("Error handling event: {e}");
                     }
                 }
                 Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
                     // Continue the loop
                 }
                 Err(e) => {
-                    eprintln!("Watch receive error: {}", e);
+                    eprintln!("Watch receive error: {e}");
                     break;
                 }
             }
@@ -68,7 +66,11 @@ impl FileWatcher {
                     if path.is_file() && self.should_process_file(&path) {
                         match self.processor.process_file(&path, false, false) {
                             Ok(ProcessResult::Cleaned(count)) => {
-                                println!("Auto-cleaned {} invisible characters from: {}", count, path.display());
+                                println!(
+                                    "Auto-cleaned {} invisible characters from: {}",
+                                    count,
+                                    path.display()
+                                );
                             }
                             Ok(ProcessResult::NoChanges) => {
                                 // Silent for no changes in watch mode
@@ -107,11 +109,12 @@ impl FileWatcher {
 
         // Skip temporary files, swap files, and hidden files commonly created by editors
         if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
-            if file_name.starts_with('.') ||
-               file_name.ends_with('~') ||
-               file_name.ends_with(".tmp") ||
-               file_name.ends_with(".swp") ||
-               file_name.contains(".#") {
+            if file_name.starts_with('.')
+                || file_name.ends_with('~')
+                || file_name.ends_with(".tmp")
+                || file_name.ends_with(".swp")
+                || file_name.contains(".#")
+            {
                 return false;
             }
         }

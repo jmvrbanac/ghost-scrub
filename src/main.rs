@@ -1,7 +1,7 @@
 use clap::{Arg, Command};
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process;
-use std::fs;
 
 mod config;
 mod processor;
@@ -34,29 +34,29 @@ fn main() {
                         .long("force")
                         .short('f')
                         .help("Overwrite existing configuration file")
-                        .action(clap::ArgAction::SetTrue)
-                )
+                        .action(clap::ArgAction::SetTrue),
+                ),
         )
         .arg(
             Arg::new("paths")
                 .help("Files or directories to process (defaults to current directory)")
                 .value_name("PATH")
                 .num_args(0..)
-                .value_parser(clap::value_parser!(PathBuf))
+                .value_parser(clap::value_parser!(PathBuf)),
         )
         .arg(
             Arg::new("dry-run")
                 .long("dry-run")
                 .short('n')
                 .help("Show what would be changed without modifying files")
-                .action(clap::ArgAction::SetTrue)
+                .action(clap::ArgAction::SetTrue),
         )
         .arg(
             Arg::new("watch")
                 .long("watch")
                 .short('w')
                 .help("Watch directories for changes and process files automatically")
-                .action(clap::ArgAction::SetTrue)
+                .action(clap::ArgAction::SetTrue),
         )
         .arg(
             Arg::new("config")
@@ -64,14 +64,14 @@ fn main() {
                 .short('c')
                 .help("Path to configuration file (defaults to .ghostscrub)")
                 .value_name("FILE")
-                .value_parser(clap::value_parser!(PathBuf))
+                .value_parser(clap::value_parser!(PathBuf)),
         )
         .arg(
             Arg::new("verbose")
                 .long("verbose")
                 .short('v')
                 .help("Show detailed output including diffs of changes")
-                .action(clap::ArgAction::SetTrue)
+                .action(clap::ArgAction::SetTrue),
         )
         .get_matches();
 
@@ -79,7 +79,7 @@ fn main() {
     if let Some(init_matches) = matches.subcommand_matches("init") {
         let force = init_matches.get_flag("force");
         if let Err(e) = run_init(force) {
-            eprintln!("Init error: {}", e);
+            eprintln!("Init error: {e}");
             process::exit(1);
         }
         return;
@@ -111,18 +111,19 @@ fn main() {
 
     if cli_config.watch {
         if let Err(e) = run_watch_mode(&cli_config, ghost_config) {
-            eprintln!("Watch mode error: {}", e);
+            eprintln!("Watch mode error: {e}");
             process::exit(1);
         }
-    } else {
-        if let Err(e) = run_single_pass(&cli_config, ghost_config) {
-            eprintln!("Processing error: {}", e);
-            process::exit(1);
-        }
+    } else if let Err(e) = run_single_pass(&cli_config, ghost_config) {
+        eprintln!("Processing error: {e}");
+        process::exit(1);
     }
 }
 
-fn run_single_pass(cli_config: &CliConfig, ghost_config: GhostScrubConfig) -> Result<(), Box<dyn std::error::Error>> {
+fn run_single_pass(
+    cli_config: &CliConfig,
+    ghost_config: GhostScrubConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
     let walker = FileWalker::new(ghost_config);
     let result = walker.process_paths(&cli_config.paths, cli_config.dry_run, cli_config.verbose)?;
     result.print_summary(cli_config.dry_run);
@@ -144,7 +145,10 @@ fn run_init(force: bool) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn run_watch_mode(cli_config: &CliConfig, ghost_config: GhostScrubConfig) -> Result<(), Box<dyn std::error::Error>> {
+fn run_watch_mode(
+    cli_config: &CliConfig,
+    ghost_config: GhostScrubConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
     let watcher = FileWatcher::new(ghost_config);
     watcher.watch_paths(&cli_config.paths)?;
     Ok(())

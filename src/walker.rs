@@ -1,8 +1,8 @@
 use crate::config::GhostScrubConfig;
 use crate::processor::{FileProcessor, ProcessResult};
 use glob::{glob, Pattern};
-use std::path::{Path, PathBuf};
 use std::fs;
+use std::path::{Path, PathBuf};
 
 pub struct FileWalker {
     processor: FileProcessor,
@@ -15,7 +15,12 @@ impl FileWalker {
         Self { processor, config }
     }
 
-    pub fn process_paths(&self, paths: &[PathBuf], dry_run: bool, verbose: bool) -> Result<WalkResult, Box<dyn std::error::Error>> {
+    pub fn process_paths(
+        &self,
+        paths: &[PathBuf],
+        dry_run: bool,
+        verbose: bool,
+    ) -> Result<WalkResult, Box<dyn std::error::Error>> {
         let mut result = WalkResult::default();
 
         for path in paths {
@@ -32,7 +37,13 @@ impl FileWalker {
         Ok(result)
     }
 
-    fn process_single_file(&self, file_path: &Path, dry_run: bool, verbose: bool, result: &mut WalkResult) -> Result<(), Box<dyn std::error::Error>> {
+    fn process_single_file(
+        &self,
+        file_path: &Path,
+        dry_run: bool,
+        verbose: bool,
+        result: &mut WalkResult,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         match self.processor.process_file(file_path, dry_run, verbose) {
             Ok(ProcessResult::Cleaned(count)) => {
                 result.files_processed += 1;
@@ -56,12 +67,24 @@ impl FileWalker {
         Ok(())
     }
 
-    fn process_directory(&self, dir_path: &Path, dry_run: bool, verbose: bool, result: &mut WalkResult) -> Result<(), Box<dyn std::error::Error>> {
+    fn process_directory(
+        &self,
+        dir_path: &Path,
+        dry_run: bool,
+        verbose: bool,
+        result: &mut WalkResult,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         self.walk_directory_recursive(dir_path, dry_run, verbose, result)?;
         Ok(())
     }
 
-    fn walk_directory_recursive(&self, dir_path: &Path, dry_run: bool, verbose: bool, result: &mut WalkResult) -> Result<(), Box<dyn std::error::Error>> {
+    fn walk_directory_recursive(
+        &self,
+        dir_path: &Path,
+        dry_run: bool,
+        verbose: bool,
+        result: &mut WalkResult,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let entries = fs::read_dir(dir_path)?;
 
         for entry in entries {
@@ -73,17 +96,21 @@ impl FileWalker {
                     continue;
                 }
                 self.walk_directory_recursive(&path, dry_run, verbose, result)?;
-            } else if path.is_file() {
-                if !self.should_skip_path(&path) {
-                    self.process_single_file(&path, dry_run, verbose, result)?;
-                }
+            } else if path.is_file() && !self.should_skip_path(&path) {
+                self.process_single_file(&path, dry_run, verbose, result)?;
             }
         }
 
         Ok(())
     }
 
-    fn process_glob_pattern(&self, pattern: &str, dry_run: bool, verbose: bool, result: &mut WalkResult) -> Result<(), Box<dyn std::error::Error>> {
+    fn process_glob_pattern(
+        &self,
+        pattern: &str,
+        dry_run: bool,
+        verbose: bool,
+        result: &mut WalkResult,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         for entry in glob(pattern)? {
             match entry {
                 Ok(path) => {
@@ -94,7 +121,7 @@ impl FileWalker {
                     }
                 }
                 Err(e) => {
-                    eprintln!("Glob error: {}", e);
+                    eprintln!("Glob error: {e}");
                     result.errors += 1;
                 }
             }
@@ -131,7 +158,10 @@ impl WalkResult {
         if dry_run {
             println!("\nDry run summary:");
             println!("  Files that would be processed: {}", self.files_processed);
-            println!("  Invisible characters that would be removed: {}", self.total_changes);
+            println!(
+                "  Invisible characters that would be removed: {}",
+                self.total_changes
+            );
         } else {
             println!("\nProcessing summary:");
             println!("  Files processed: {}", self.files_processed);

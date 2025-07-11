@@ -124,7 +124,6 @@ fn default_exclude_patterns() -> Vec<String> {
         "**/.svn/**".to_string(),
         "**/.hg/**".to_string(),
         "**/.bzr/**".to_string(),
-
         // Build artifacts and dependencies
         "**/target/**".to_string(),
         "**/node_modules/**".to_string(),
@@ -133,14 +132,12 @@ fn default_exclude_patterns() -> Vec<String> {
         "**/out/**".to_string(),
         "**/bin/**".to_string(),
         "**/obj/**".to_string(),
-
         // Python
         "**/__pycache__/**".to_string(),
         "**/.pytest_cache/**".to_string(),
         "**/venv/**".to_string(),
         "**/.venv/**".to_string(),
         "**/*.egg-info/**".to_string(),
-
         // IDEs and editors
         "**/.idea/**".to_string(),
         "**/.vscode/**".to_string(),
@@ -149,18 +146,15 @@ fn default_exclude_patterns() -> Vec<String> {
         "**/*.swo".to_string(),
         "**/*~".to_string(),
         "**/.#*".to_string(),
-
         // OS specific
         "**/.DS_Store".to_string(),
         "**/Thumbs.db".to_string(),
         "**/desktop.ini".to_string(),
-
         // Temporary files
         "**/*.tmp".to_string(),
         "**/*.temp".to_string(),
         "**/*.bak".to_string(),
         "**/*.orig".to_string(),
-
         // Logs
         "**/*.log".to_string(),
         "**/logs/**".to_string(),
@@ -194,20 +188,20 @@ impl GhostScrubConfig {
     }
 
     pub fn load_default() -> Self {
-        if let Ok(config) = Self::load_from_file(".ghostscrub") {
-            config
-        } else {
-            Self::default()
-        }
+        Self::load_from_file(".ghostscrub").unwrap_or_default()
     }
 
     pub fn should_process_file(&self, file_path: &Path) -> bool {
         if let Some(extension) = file_path.extension().and_then(|ext| ext.to_str()) {
-            if !self.exclude_extensions.is_empty() && self.exclude_extensions.contains(&extension.to_string()) {
+            if !self.exclude_extensions.is_empty()
+                && self.exclude_extensions.contains(&extension.to_string())
+            {
                 return false;
             }
 
-            if !self.include_extensions.is_empty() && !self.include_extensions.contains(&extension.to_string()) {
+            if !self.include_extensions.is_empty()
+                && !self.include_extensions.contains(&extension.to_string())
+            {
                 return false;
             }
         }
